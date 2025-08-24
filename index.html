@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ёвар — Оценка консультанта</title>
+<style>
+  :root{
+    --brand:#FF0000; --bg:#f5f6f8; --panel:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
+    --tab:#e9edf2; --tabActive:#2f3943; --tabText:#111827; --tabTextActive:#ffffff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{margin:0; background:var(--bg); color:var(--text); font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;}
+  .wrap{max-width:520px; margin:0 auto; padding:12px;}
+  .logo{display:flex; align-items:center; justify-content:center; padding:16px 0 10px;}
+  .logo img{height:48px; width:auto;}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #fceaea; /* светлый оттенок для неактивной */
+  color: var(--brand);
+  border: 2px solid var(--brand);
+  transition: all .2s ease;
+}
+
+.tab.active {
+  background: var(--brand);
+  color: #fff;
+}
+
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(0,0,0,.06);}
+  label{display:block; font-weight:600; margin:12px 0 6px;}
+  select,input{width:100%; padding:14px 12px; border:1px solid var(--line); border-radius:12px; font-size:16px; background:#fff; outline:none;}
+  select:focus,input:focus{border-color:var(--brand); box-shadow:0 0 0 3px rgba(255,0,0,.12);}
+  .stars{display:flex; gap:12px; font-size:80px; margin:6px 0 2px;}
+  .star{line-height:1; cursor:pointer; user-select:none; transition:transform .05s ease; padding:6px;}
+  .star:active{transform:scale(.94);}
+  .muted{color:var(--muted); font-size:13px;}
+  .btn{width:100%; border:none; padding:14px 16px; border-radius:14px; background:var(--brand); color:#fff; font-weight:700; font-size:16px; margin-top:16px; cursor:pointer;}
+  .btn[disabled]{opacity:.5; cursor:not-allowed;}
+  .ok{display:none; margin-top:14px; color:#0d7a2a; font-weight:600;}
+  .err{display:none; margin-top:14px; color:#b00020; font-weight:600; white-space:pre-wrap;}
+  .footer-note{margin-top:12px; text-align:center; font-size:12px; color:var(--muted);}
+
+  /* рейтинг */
+  .grid{display:grid; grid-template-columns:1fr; gap:12px;}
+  .rank-card{border:1px solid var(--line); border-radius:12px; padding:12px; background:#fff;}
+  .rank-title{font-weight:700; margin-bottom:8px;}
+  .list{margin:0; padding:0; list-style:none;}
+  .row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed var(--line);}
+  .row:last-child{border-bottom:none;}
+  .name{flex:1; padding-right:8px;}
+  .score{font-weight:700;}
+  .count{color:var(--muted); font-size:13px; margin-left:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo"><img src="https://jobs.evar.tj/img/main/logo.png" alt="Ёвар"></div>
+
+  <div class="tabs">
+    <div class="tab active" id="tabForm">Отзыв</div>
+    <div class="tab" id="tabRating">Рейтинг</div>
+  </div>
+
+  <!-- ВКЛАДКА: ОТЗЫВЫ -->
+  <div id="paneForm" class="card">
+    <label for="branch">Филиал</label>
+    <select id="branch"><option value="" selected disabled>Загрузка…</option></select>
+
+    <label for="staff">Сотрудник</label>
+    <select id="staff" disabled><option value="" selected disabled>Сначала выберите филиал</option></select>
+
+    <label>Оценка консультанта</label>
+    <div class="stars" id="stars">
+      <span class="star" data-v="1">☆</span><span class="star" data-v="2">☆</span>
+      <span class="star" data-v="3">☆</span><span class="star" data-v="4">☆</span><span class="star" data-v="5">☆</span>
+    </div>
+    <div class="muted" id="ratingHint">Нажмите, чтобы выбрать оценку</div>
+
+    <label for="buyerName">Ваше ФИО</label>
+    <input id="buyerName" type="text" placeholder="Иванов Иван" autocomplete="name">
+
+    <label for="buyerPhone">Ваш номер телефона</label>
+    <input id="buyerPhone" type="tel" inputmode="tel" placeholder="+992 90 000 00 00" autocomplete="tel">
+
+    <button class="btn" id="sendBtn" disabled>Отправить отзыв</button>
+    <div class="ok" id="okMsg">Спасибо! Отзыв отправлен ✅</div>
+    <div class="err" id="errMsg"></div>
+    <div class="footer-note">Нажимая кнопку, вы соглашаетесь на обработку контактных данных для верификации отзыва.</div>
+  </div>
+
+  <!-- ВКЛАДКА: РЕЙТИНГ -->
+  <div id="paneRating" class="card" style="display:none;">
+    <div class="grid">
+      <div class="rank-card">
+        <div class="rank-title">ТОП-10 филиалов </div>
+        <ul id="listBranches" class="list"></ul>
+      </div>
+      <div class="rank-card">
+        <div class="rank-title">ТОП-10 сотрудников </div>
+        <ul id="listStaff" class="list"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/** ВСТАВЬ сюда актуальный /exec URL веб-приложения */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8kc5n_4l6M4pQkJ8a0QtjFnnausYye4y0mapjrGNU4dcKjMFIvhr0vPQFMCba6Y5j8Q/exec';
+
+const $ = id => document.getElementById(id);
+let directory = {branches: [], byBranch: {}};
+let rating = 0;
+
+function setStars(val){
+  rating = val;
+  $('stars').querySelectorAll('.star').forEach(n=>{
+    const v = Number(n.getAttribute('data-v'));
+    n.textContent = (v <= val) ? '★' : '☆';
+    n.style.color = (v <= val) ? 'var(--brand)' : '#bbb';
+  });
+  $('ratingHint').textContent = rating ? `Вы выбрали: ${rating} из 5` : 'Нажмите, чтобы выбрать оценку';
+  evaluateReady();
+}
+
+function fillBranches() {
+  const br = $('branch');
+  br.innerHTML = '<option value="" disabled selected>Выберите филиал</option>';
+  directory.branches.forEach(b=>{
+    const opt = document.createElement('option');
+    opt.value = b; opt.textContent = b;
+    br.appendChild(opt);
+  });
+}
+
+function onBranchChange() {
+  const b = $('branch').value;
+  const st = $('staff');
+  st.disabled = !b;
+  st.innerHTML = b ? '<option value="" disabled selected>Выберите сотрудника</option>' : '<option value="" disabled selected>Сначала выберите филиал</option>';
+  if (!b) return;
+  (directory.byBranch[b] || []).forEach(item=>{
+    const opt = document.createElement('option');
+    opt.value = item.id;
+    opt.textContent = `${item.name} (ID: ${item.id})`;
+    opt.setAttribute('data-name', item.name);
+    st.appendChild(opt);
+  });
+  evaluateReady();
+}
+
+function normalizePhone(v){
+  v = String(v||'').trim();
+  const hasPlus = v.startsWith('+');
+  const digits = v.replace(/\D/g,'');
+  return hasPlus ? ('+'+digits) : digits;
+}
+
+function evaluateReady() {
+  const ready =
+    $('branch').value &&
+    $('staff').value &&
+    rating > 0 &&
+    $('buyerName').value.trim() &&
+    $('buyerPhone').value.trim();
+  $('sendBtn').disabled = !ready;
+}
+
+async function loadDirectory(){
+  $('branch').innerHTML = '<option value="" disabled selected>Загрузка…</option>';
+  try{
+    const res = await fetch(SCRIPT_URL + '?mode=directory&rand=' + Date.now(), { method:'GET' });
+    const data = await res.json();
+    if (data && data.ok) { directory = data; fillBranches(); }
+    else { throw new Error('Не удалось получить справочник'); }
+  } catch(err){
+    $('branch').innerHTML = '<option value="" disabled selected>Ошибка загрузки</option>';
+    $('errMsg').textContent = String(err);
+    $('errMsg').style.display='block';
+  }
+}
+
+async function loadStats(){
+  try{
+    const res = await fetch(SCRIPT_URL + '?mode=stats&rand=' + Date.now(), { method:'GET' });
+    const data = await res.json();
+    if (!data || !data.ok) throw new Error('Не удалось получить рейтинг');
+
+    // филиалы
+    const lb = $('listBranches');
+    lb.innerHTML = '';
+    data.branchesTop.forEach((row, idx)=>{
+      const li = document.createElement('li'); li.className = 'row';
+      li.innerHTML = `<div class="name">${idx+1}. ${row.branch}</div>
+                      <div class="score">${row.score}</div>
+                      <div class="count">(${row.count} отз.)</div>`;
+      lb.appendChild(li);
+    });
+
+    // сотрудники
+    const ls = $('listStaff');
+    ls.innerHTML = '';
+    data.staffTop.forEach((row, idx)=>{
+      const li = document.createElement('li'); li.className = 'row';
+      li.innerHTML = `<div class="name">${idx+1}. ${row.name} <span class="count">— ${row.branch}</span></div>
+                      <div class="score">${row.score}</div>
+                      <div class="count">(${row.count} отз.)</div>`;
+      ls.appendChild(li);
+    });
+  } catch(err){
+    $('listBranches').innerHTML = '<li class="row"><div class="name">Ошибка загрузки рейтинга</div></li>';
+    $('listStaff').innerHTML = '';
+  }
+}
+
+async function submitFeedback(){
+  $('okMsg').style.display='none';
+  $('errMsg').style.display='none';
+  $('sendBtn').disabled = true;
+
+  const stSel = $('staff');
+  const payload = {
+    branch: $('branch').value,
+    staffId: stSel.value,
+    staffName: stSel.options[stSel.selectedIndex]?.getAttribute('data-name') || '',
+    rating: String(rating),
+    buyerName: $('buyerName').value.trim(),
+    buyerPhone: normalizePhone($('buyerPhone').value)
+  };
+
+  const body = new URLSearchParams(payload); // simple request, без preflight
+
+  try{
+    await fetch(SCRIPT_URL, { method: 'POST', body }); // не ставим headers!
+    $('okMsg').style.display='block';
+    setStars(0); $('buyerName').value=''; $('buyerPhone').value=''; evaluateReady();
+  } catch(err1){
+    try{
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body.toString()], { type: 'application/x-www-form-urlencoded' });
+        const queued = navigator.sendBeacon(SCRIPT_URL, blob);
+        if (queued) {
+          $('okMsg').style.display='block';
+          setStars(0); $('buyerName').value=''; $('buyerPhone').value=''; evaluateReady();
+          $('sendBtn').disabled = false; return;
+        }
+      }
+      await fetch(SCRIPT_URL, { method: 'POST', body, mode: 'no-cors' });
+      $('okMsg').style.display='block';
+      setStars(0); $('buyerName').value=''; $('buyerPhone').value=''; evaluateReady();
+    } catch(err2){
+      $('errMsg').textContent = 'Не удалось отправить отзыв. Попробуйте ещё раз.';
+      $('errMsg').style.display='block';
+    }
+  } finally{
+    $('sendBtn').disabled = false;
+  }
+}
+
+/* Переключение вкладок */
+function showTab(which){
+  const a = $('tabForm'), b = $('tabRating');
+  const p1 = $('paneForm'), p2 = $('paneRating');
+  if (which === 'rating'){
+    a.classList.remove('active'); b.classList.add('active');
+    p1.style.display='none'; p2.style.display='block';
+    loadStats();
+  } else {
+    b.classList.remove('active'); a.classList.add('active');
+    p2.style.display='none'; p1.style.display='block';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadDirectory();
+  $('stars').querySelectorAll('.star').forEach(el=>{
+    el.addEventListener('click', ()=> setStars(Number(el.getAttribute('data-v'))));
+  });
+  $('branch').addEventListener('change', onBranchChange);
+  $('staff').addEventListener('change', evaluateReady);
+  $('buyerName').addEventListener('input', evaluateReady);
+  $('buyerPhone').addEventListener('input', evaluateReady);
+  $('sendBtn').addEventListener('click', submitFeedback);
+  $('tabForm').addEventListener('click', ()=> showTab('form'));
+  $('tabRating').addEventListener('click', ()=> showTab('rating'));
+});
+</script>
+</body>
+</html>
