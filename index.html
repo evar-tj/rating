@@ -45,9 +45,27 @@
   label{display:block; font-weight:600; margin:12px 0 6px;}
   select,input{width:100%; padding:14px 12px; border:1px solid var(--line); border-radius:12px; font-size:16px; background:#fff; outline:none;}
   select:focus,input:focus{border-color:var(--brand); box-shadow:0 0 0 3px rgba(255,0,0,.12);}
-  .stars{display:flex; gap:12px; font-size:80px; margin:6px 0 2px;}
-  .star{line-height:1; cursor:pointer; user-select:none; transition:transform .05s ease; padding:6px;}
-  .star:active{transform:scale(.94);}
+/* Ровно 5 одинаковых колонок, без переполнения */
+.stars{
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  column-gap: 8px;           /* расстояние между звёздами */
+  font-size: clamp(32px, 9.5vw, 56px); /* адаптивный размер, но с безопасными пределами */
+  margin: 6px 0 2px;
+  width: 100%;
+}
+
+.star{
+  display: flex;             /* центрируем символ внутри ячейки */
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;                /* убираем лишние отступы, из-за них было переполнение */
+  cursor: pointer;
+  user-select: none;
+  transition: transform .05s ease;
+}
+
   .muted{color:var(--muted); font-size:13px;}
   .btn{width:100%; border:none; padding:14px 16px; border-radius:14px; background:var(--brand); color:#fff; font-weight:700; font-size:16px; margin-top:16px; cursor:pointer;}
   .btn[disabled]{opacity:.5; cursor:not-allowed;}
